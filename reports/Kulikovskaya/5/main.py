@@ -1,4 +1,3 @@
-from contextlib import asynccontextmanager
 from typing import List, Optional
 
 from fastapi import FastAPI, Depends, HTTPException
@@ -19,19 +18,6 @@ app = FastAPI(title="System Administrator API", version="1.0.0")
 @app.on_event("startup")
 async def startup_event():
     init_db()
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    init_db()
-    yield
-
-
-app = FastAPI(
-    title="System Administrator API",
-    version="1.0.0",
-    lifespan=lifespan
-)
 
 
 # ADMIN ENDPOINTS
