@@ -243,13 +243,8 @@ class GitHubMonitor:
         print(f"   Forks: {self.stats['forks']}")
         print("\n" + "=" * 80)
 
-    def visualize(self) -> None:
-        """Visualize data"""
-        fig, axes = plt.subplots(2, 2, figsize=(12, 10))
-        fig.suptitle(f'Analysis: {self.repo}', fontsize=14, fontweight='bold')
-
-        # Activity graph
-        ax1 = axes[0, 0]
+    def _draw_activity_graph(self, ax) -> None:
+        """Draw activity graph"""
         categories = ['Commits', 'PR\nopen', 'PR\nclosed', 'Issues\nopen', 'Issues\nclosed']
         values = [
             len(self.stats['commits']),
@@ -259,39 +254,49 @@ class GitHubMonitor:
             len(self.stats['issues']['closed'])
         ]
         colors = ['#2ecc71', '#3498db', '#e74c3c', '#3498db', '#e74c3c']
-        plot_bars = ax1.bar(categories, values, color=colors, alpha=0.7)
-        ax1.set_ylabel('Count')
-        ax1.set_title('Activity for period')
+        plot_bars = ax.bar(categories, values, color=colors, alpha=0.7)
+        ax.set_ylabel('Count')
+        ax.set_title('Activity for period')
         for bar_obj, val in zip(plot_bars, values):
             if val > 0:
-                ax1.text(bar_obj.get_x() + bar_obj.get_width()/2,
-                        bar_obj.get_height() + 0.1, str(val), ha='center')
+                ax.text(bar_obj.get_x() + bar_obj.get_width()/2,
+                       bar_obj.get_height() + 0.1, str(val), ha='center')
 
-        # Top contributors
-        ax2 = axes[0, 1]
+    def _draw_contributors_graph(self, ax) -> None:
+        """Draw top contributors graph"""
         if self.stats['commits']:
             counts = Counter()
             for commit in self.stats['commits']:
                 counts[commit['commit']['author']['name']] += 1
             top = dict(counts.most_common(5))
             if top:
-                ax2.pie(top.values(), labels=top.keys(), autopct='%1.1f%%')
-                ax2.set_title('Top contributors')
+                ax.pie(top.values(), labels=top.keys(), autopct='%1.1f%%')
+                ax.set_title('Top contributors')
 
-        # Mentions
-        ax3 = axes[1, 0]
+    def _draw_mentions_graph(self, ax) -> None:
+        """Draw top mentions graph"""
         if self.stats['mentions']:
             top = dict(sorted(self.stats['mentions'].items(),
                             key=lambda x: len(x[1]), reverse=True)[:5])
-            ax3.barh(list(top.keys()), [len(v) for v in top.values()], color='#9b59b6')
-            ax3.set_xlabel('Mentions')
-            ax3.set_title('Top mentions')
+            ax.barh(list(top.keys()), [len(v) for v in top.values()], color='#9b59b6')
+            ax.set_xlabel('Mentions')
+            ax.set_title('Top mentions')
 
-        # Repository stats
-        ax4 = axes[1, 1]
-        ax4.bar(['Stars', 'Forks'], [self.stats['stars'], self.stats['forks']],
-                color=['#f1c40f', '#2c3e50'])
-        ax4.set_title('Repository stats')
+    def _draw_stats_graph(self, ax) -> None:
+        """Draw repository stats graph"""
+        ax.bar(['Stars', 'Forks'], [self.stats['stars'], self.stats['forks']],
+               color=['#f1c40f', '#2c3e50'])
+        ax.set_title('Repository stats')
+
+    def visualize(self) -> None:
+        """Visualize data"""
+        fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+        fig.suptitle(f'Analysis: {self.repo}', fontsize=14, fontweight='bold')
+
+        self._draw_activity_graph(axes[0, 0])
+        self._draw_contributors_graph(axes[0, 1])
+        self._draw_mentions_graph(axes[1, 0])
+        self._draw_stats_graph(axes[1, 1])
 
         plt.tight_layout()
         plt.show()
@@ -327,7 +332,7 @@ def main() -> None:
     except KeyboardInterrupt:
         print("\n\nInterrupted")
         sys.exit(0)
-    except Exception as e:
+    except (requests.exceptions.RequestException, ValueError, KeyError) as e:
         print(f"\nError: {e}")
         sys.exit(1)
 
