@@ -3,6 +3,8 @@ from unittest.mock import patch
 import pytest
 from shopping import Cart, log_purchase, apply_coupon
 
+# pylint: disable=redefined-outer-name
+
 @pytest.fixture
 def empty_cart():
     """Fixture to provide an empty Cart instance."""
