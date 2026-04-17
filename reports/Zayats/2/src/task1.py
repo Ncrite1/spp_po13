@@ -40,7 +40,6 @@ class Rectangle:
         if not isinstance(other, Rectangle):
             return NotImplemented
         return self._a == other._a and self._b == other._b
-    
 
 height = float(input("Введите сторону a: "))
 width = float(input("Введите сторону b: "))
@@ -54,10 +53,8 @@ if rect.exists():
 2. Периметр
 3. Квадрат ли это?
 """)
-        
         if s == "":
             break
-        
         if s == "1":
             print("Площадь:", rect.area())
         elif s == "2":

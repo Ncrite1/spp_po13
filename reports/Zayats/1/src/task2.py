@@ -1,22 +1,23 @@
 s = input("Введите строку: ")
+
 stack = []
-FLAG = True
+flag = True
 
 for c in s:
     if c in ('(', '[', '{'):
         stack.append(c)
     else:
         if not stack:
-            FLAG = False
+            flag = False
             break
 
         last = stack.pop()
 
         if (c, last) not in {(')', '('), (']', '['), ('}', '{')}:
-            FLAG = False
+            flag = False
             break
 
 if stack:
-    FLAG = False
+    flag = False
 
-print(FLAG)
+print(flag)
